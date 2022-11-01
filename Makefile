@@ -1,19 +1,27 @@
 ENV			=	./srcs/.env
 USER		=	$(shell whoami)
+NAME		=	inception
 NICKNAME	=	cmero
-PATH_DIR	=	/home/${USER}/data/{db,wp,adminer}
+DATA_DIR	=	/home/${USER}/data
 
 all: add_dns_to_host
-	@mkdir -p ${PATH_DIR} 2>/dev/null || true
-	sudo docker-compose -f  srcs/docker-compose.yml build    # собираем все
-	sudo docker-compose -f  srcs/docker-compose.yml up
+	@mkdir -p ${DATA_DIR}/{db,wp,adminer} 2>/dev/null || true
+	@echo "Запуск конфигурации ${name}..."
+	@sudo docker-compose -f  srcs/docker-compose.yml build    # собираем все
+	@sudo docker-compose -f  srcs/docker-compose.yml up
 # sudo docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
 
+build:
+	@echo "Сборка конфигурации ${name}..."
+	@sudo docker-compose -f  srcs/docker-compose.yml build
+
 up:
-	sudo docker-compose -f  srcs/docker-compose.yml up -d 
+	@printf "Запуск конфигурации ${name}...\n"
+	@sudo docker-compose -f  srcs/docker-compose.yml up -d
 
 down:
-	sudo docker-compose -f  srcs/docker-compose.yml down 
+	@printf "Остановка конфигурации ${name}...\n"
+	@sudo docker-compose -f  srcs/docker-compose.yml down
 
 #### Nginx ####
 enter_nginx:
@@ -44,18 +52,18 @@ ps:
 	sudo docker ps -a
 
 pss:
-	sudo docker-compose -f  srcs/docker-compose.yml ps
+	sudo docker-compose -f srcs/docker-compose.yml ps
 
 # Images
 images:
 	sudo docker images -a
 
-## Удаляет папку (грубо говоря Volume) и заново создаем
+## Удаляем папку (грубо говоря Volume) и заново создаем
 recreatedir:
-	@sudo rm -rf ${PATH_DIR} 2>/dev/null
-	@mkdir ${PATH_DIR} 2>/dev/null
+	@sudo rm -rf ${DATA_DIR}/{db,wp,adminer} 2>/dev/null
+	@mkdir ${DATA_DIR}/{db,wp,adminer} 2>/dev/null
 
-## останавливает все контейнейры
+## останавливаем все контейнейры
 stop:
 	sudo docker stop $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
@@ -77,18 +85,39 @@ rm_network:
 rm_dir:
 	@sudo rm -rf /home/${USER}/data 2>/dev/null
 
-clean:	stop remote rm_volume rm_network rm_dir
-	sudo docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
+#clean:	stop remote rm_volume rm_network rm_dir
+#	@echo "Очистка конфигурации ${name}..."
+#	sudo docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
-fclean:	clean
-	sudo docker rmi -f $$(sudo docker images -aq) 2>/dev/null || echo " "
-	sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
+clean: down
+	@echo "Очистка конфигурации ${name}..."
+	@docker system prune -a			# сносит все (неиспользуемые контейнеры, образы, кэш), кроме волиумов
+
+#fclean:	clean
+#	@echo "Полная очистка конфигурации ${name}..."
+#	sudo docker rmi -f $$(sudo docker images -aq) 2>/dev/null || echo " "
+#	sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
+
+fclean:
+	@printf "Полная очистка всех конфигураций docker\n"
+	@docker stop $$(docker ps -qa) 2>/dev/null || echo " "
+	@docker system prune --all --force --volumes
+	@docker network prune --force
+	@docker volume prune --force
+	@sudo rm -rf ${DATA_DIR} 2>/dev/null
+	@sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
+
+#re:	fclean recreatedir all
+
+re:	down
+	@echo "Пересборка конфигурации ${name}..."
+	@docker-compose -f srcs/docker-compose.yml up -d --build
 
 add_dns_to_host:
 	@echo "Задать доменное имя локальному сайту: ${NICKNAME}.42.fr"
-	@echo "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
+	@echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
 
-re:	fclean all recreatedir add_dns_to_host
+.PHONY	: all build down re clean fclean add_dns_to_host
 
 # how use docker don't sudos
 # sudo groupadd docker
@@ -96,3 +125,5 @@ re:	fclean all recreatedir add_dns_to_host
 # sudo service docker restart
 # sudo docker volume rm inception-volume 
 # sudo docker volume rm db-volume 
+
+#TODO проверить корректность make start после make stop и коды выхода

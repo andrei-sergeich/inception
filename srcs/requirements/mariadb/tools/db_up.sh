@@ -1,12 +1,12 @@
 #!/bin/sh
 
-chown -R mysql:mysql /var/lib/mysql
-chmod 755 -R /var/lib/mysql
-mkfifo /var/run/mysqld/mysqld.sock
-touch /var/run/mysqld/mysqld.pid
-chown -R mysql /var/run/mysqld
+#chown -R mysql:mysql /var/lib/mysql
+#chmod 755 -R /var/lib/mysql
+#mkfifo /var/run/mysqld/mysqld.sock
+#touch /var/run/mysqld/mysqld.pid
+#chown -R mysql:mysql /var/run/mysqld
 
-if [ ! -d "/var/lib/mysql/wordpress" ]; then
+if [ ! -d "/var/lib/mysql/$DB_NAME" ]; then
     service mysql start
     mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME DEFAULT CHARACTER SET utf8;"
     mysql -u root -e "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
@@ -17,3 +17,5 @@ if [ ! -d "/var/lib/mysql/wordpress" ]; then
 fi
 
 /usr/bin/mysqld_safe
+
+# TODO убрать строки 3 - 7, подключиться к БД через CLion (docker inspect mariadb)

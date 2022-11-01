@@ -58,3 +58,4 @@ dkms.conf
 *.pdf
 .DS_Store
 .DS_Store?
+*-tema
