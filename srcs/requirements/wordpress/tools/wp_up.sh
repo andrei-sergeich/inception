@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# переменные тянутся из .env
+# переменные (ВСЕ) тянутся из .env
 
 echo "Wordpress building start..."
 
 chown -R www-data:www-data /var/www/html/wordpress/
 chmod -R 775 /var/www/
 mkdir -p /run/php/
-touch /run/php/php${PHP_VERSION}-fpm.pid
+touch /run/php/php"${PHP_VERSION}"-fpm.pid
 
 wp config create --allow-root \
-                --dbname=${DB_NAME} \
+                --dbname="${DB_NAME}" \
                 --dbuser="${DB_USER}" \
-                --dbhost=${DB_HOST} \
+                --dbhost="${DB_HOST}" \
                 --dbpass="${DB_USER_PASSWORD}" \
                 --path=/var/www/html/wordpress/
-sleep 5
+sleep 5                                             # НЕ УМЕНЬШАТЬ значение (иначе не будет связи с БД)
 wp core install --allow-root \
                 --url=cmero.42.fr \
                 --title=Pentagon-Almost-Official-Site \

@@ -6,21 +6,21 @@ DATA_DIR	=	/home/${USER}/data
 
 all: add_dns_to_host
 	@mkdir -p ${DATA_DIR}/{db,wp,adminer} 2>/dev/null || true
-	@echo "Запуск конфигурации ${name}..."
+	@echo -e "\nЗапуск конфигурации ${NAME}..."
 	@sudo docker-compose -f  srcs/docker-compose.yml build    # собираем все
 	@sudo docker-compose -f  srcs/docker-compose.yml up
 # sudo docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
 
 build:
-	@echo "Сборка конфигурации ${name}..."
+	@echo "Сборка конфигурации ${NAME}..."
 	@sudo docker-compose -f  srcs/docker-compose.yml build
 
 up:
-	@printf "Запуск конфигурации ${name}...\n"
+	@printf "Запуск конфигурации ${NAME}...\n"
 	@sudo docker-compose -f  srcs/docker-compose.yml up -d
 
 down:
-	@printf "Остановка конфигурации ${name}...\n"
+	@printf "Остановка конфигурации ${NAME}...\n"
 	@sudo docker-compose -f  srcs/docker-compose.yml down
 
 #### Nginx ####
@@ -86,15 +86,15 @@ rm_dir:
 	@sudo rm -rf /home/${USER}/data 2>/dev/null
 
 #clean:	stop remote rm_volume rm_network rm_dir
-#	@echo "Очистка конфигурации ${name}..."
+#	@echo "Очистка конфигурации ${NAME}..."
 #	sudo docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
 clean: down
-	@echo "Очистка конфигурации ${name}..."
+	@echo "Очистка конфигурации ${NAME}..."
 	@docker system prune -a			# сносит все (неиспользуемые контейнеры, образы, кэш), кроме волиумов
 
 #fclean:	clean
-#	@echo "Полная очистка конфигурации ${name}..."
+#	@echo "Полная очистка конфигурации ${NAME}..."
 #	sudo docker rmi -f $$(sudo docker images -aq) 2>/dev/null || echo " "
 #	sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
 
@@ -110,7 +110,7 @@ fclean:
 #re:	fclean recreatedir all
 
 re:	down
-	@echo "Пересборка конфигурации ${name}..."
+	@echo "Пересборка конфигурации ${NAME}..."
 	@docker-compose -f srcs/docker-compose.yml up -d --build
 
 add_dns_to_host:
