@@ -53,13 +53,13 @@ volumes:
       type: none # тип сервиса контейнера
       # type: the mount type volume, bind, tmpfs or npipe
       o: bind # устанавливает специфические опции для драйвера
-      device: /home/andrei/data/db # куда сохраняются данные для каждого сервиса
+      device: /home/${USER}/data/db # куда сохраняются данные для каждого сервиса
   wp:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/andrei/data/wp
+      device: /home/${USER}/data/wp # ${USER} переменная среды окружения локального хоста
 
 networks:
   inception_net: # название сети

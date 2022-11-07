@@ -5,35 +5,38 @@ NICKNAME	=	cmero
 DATA_DIR	=	/home/${USER}/data
 
 all: add_dns_to_host
-	@mkdir -p ${DATA_DIR}/{db,wp,adminer} 2>/dev/null || true
+	@#mkdir -p ${DATA_DIR}/{db,wp,adminer} 2>/dev/null на виртуалке не прокатило
+	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
+	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
+	@mkdir -p ${DATA_DIR}/adminer 2>/dev/null || true
 	@echo -e "\nЗапуск конфигурации ${NAME}..."
-	@sudo docker-compose -f  srcs/docker-compose.yml build    # собираем все
-	@sudo docker-compose -f  srcs/docker-compose.yml up
-# sudo docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
+	@docker-compose -f  srcs/docker-compose.yml build    # собираем все
+	@docker-compose -f  srcs/docker-compose.yml up
+	@#docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
 
 build:
 	@echo "Сборка конфигурации ${NAME}..."
-	@sudo docker-compose -f  srcs/docker-compose.yml build
+	@docker-compose -f  srcs/docker-compose.yml build
 
 up:
 	@printf "Запуск конфигурации ${NAME}...\n"
-	@sudo docker-compose -f  srcs/docker-compose.yml up -d
+	@docker-compose -f  srcs/docker-compose.yml up -d
 
 down:
 	@printf "Остановка конфигурации ${NAME}...\n"
-	@sudo docker-compose -f  srcs/docker-compose.yml down
+	@docker-compose -f  srcs/docker-compose.yml down
 
 #### Nginx ####
 enter_nginx:
-	sudo docker exec -it nginx /bin/bash
+	docker exec -it nginx /bin/bash
 
 ### MariadDb ###
 enter_mariadb:
-	sudo docker exec -it mariadb /bin/bash
+	docker exec -it mariadb /bin/bash
 
 ### wordpress ###
 enter_wordpres:
-	sudo docker exec -it wordpress /bin/bash
+	docker exec -it wordpress /bin/bash
 
 # check protocol
 tls:
@@ -41,43 +44,47 @@ tls:
 
 ## Volume
 volumes:
-	sudo docker volume ls
+	docker volume ls
 
 ## Networks
 networks:
-	sudo docker network ls
+	docker network ls
 
 ## Ps
 ps:
-	sudo docker ps -a
+	docker ps -a
 
 pss:
-	sudo docker-compose -f srcs/docker-compose.yml ps
+	docker-compose -f srcs/docker-compose.yml ps
 
 # Images
 images:
-	sudo docker images -a
+	docker images -a
 
 ## Удаляем папку (грубо говоря Volume) и заново создаем
 recreatedir:
-	@sudo rm -rf ${DATA_DIR}/{db,wp,adminer} 2>/dev/null
-	@mkdir ${DATA_DIR}/{db,wp,adminer} 2>/dev/null
+	@sudo rm -rf ${DATA_DIR}/db  2>/dev/null
+	@sudo rm -rf ${DATA_DIR}/wp  2>/dev/null
+	@sudo rm -rf ${DATA_DIR}/adminer 2>/dev/null
+	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
+	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
+	@mkdir -p ${DATA_DIR}/adminer 2>/dev/null || true
 
 ## останавливаем все контейнейры
 stop:
-	sudo docker stop $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker stop $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
 ## запускаем все контейнейры
 start:
-	sudo docker start $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker start $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
 ## удаляет контейнеры
 remote:
-	sudo docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
 
 ## удаляет Volume
 rm_volume:
-	sudo docker volume rm $$(docker volume ls -q)  2>/dev/null || echo " "
+	docker volume rm $$(docker volume ls -q)  2>/dev/null || echo " "
 
 rm_network:
 	docker network rm $$(docker network ls -q) 2>/dev/null || echo " "
@@ -99,7 +106,7 @@ clean: down
 #	sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
 
 fclean:
-	@printf "Полная очистка всех конфигураций docker\n"
+	@printf "Полная очистка всех конфигураций ${NAME}...\n"
 	@docker stop $$(docker ps -qa) 2>/dev/null || echo " "
 	@docker system prune --all --force --volumes
 	@docker network prune --force
