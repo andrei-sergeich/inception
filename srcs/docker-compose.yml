@@ -62,6 +62,8 @@ services:
       context: ./requirements/bonus/proftpd/
     image:  cmero-proftpd:${version:-latest}
     container_name: proftpd
+    env_file:
+      - .env
     volumes:
       - wp:/var/www/html/wordpress
     networks:
