@@ -39,6 +39,10 @@ enter_wordpres:
 enter_redis:
 	docker exec -it redis /bin/bash
 
+### redis ###
+enter_proftpd:
+	docker exec -it proftpd /bin/bash
+
 # check protocol
 tls:
 	openssl s_client -connect 127.0.0.1:443

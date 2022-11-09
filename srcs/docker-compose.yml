@@ -56,6 +56,23 @@ services:
     depends_on:
       - mariadb
     restart: always
+# proFTPd
+  proftpd:
+    build:
+      context: ./requirements/bonus/proftpd/
+    image:  cmero-proftpd:${version:-latest}
+    container_name: proftpd
+    volumes:
+      - wp:/var/www/html/wordpress
+    networks:
+      - inception_net
+    ports:
+      - "10020:20"
+      - "10021:21"
+      - "60000-60030:60000-60030" # диапазон должен соответствовать диапазону пассивных портов в файле настроек
+    depends_on:
+      - wordpress
+    restart: always
 
 volumes:
   db:
