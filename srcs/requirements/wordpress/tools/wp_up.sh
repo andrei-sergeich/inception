@@ -31,15 +31,8 @@ wp user create "${WP_USER}" "${WP_USER_EMAIL}" \
                 --role=author --user_pass="${WP_USER_PASS}" \
                 --allow-root --path=/var/www/html/wordpress/
 
-# TODO возможно установку редис-кэш нужно будет отсюда убрать
-cd /var/www/html/wordpress/ || echo "cd failed"
-wp plugin install redis-cache --activate --allow-root
-wp plugin update --all --allow-root
-wp redis enable --allow-root
-
-wp theme install inspiro --activate --allow-root # neve
-
+wp plugin install redis-cache --activate --allow-root --path="/var/www/html/wordpress"
+wp theme install inspiro --activate --allow-root --path="/var/www/html/wordpress" # neve
 echo "Wordpress started on :9000"
 
-#/usr/sbin/php-fpm"${PHP_VERSION}" -F
-exec $cmd
+exec $cmd   #/usr/sbin/php-fpm"${PHP_VERSION}" -F

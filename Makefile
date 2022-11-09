@@ -5,11 +5,8 @@ NICKNAME	=	cmero
 DATA_DIR	=	/home/${USER}/data
 
 all: add_dns_to_host
-	@#mkdir -p ${DATA_DIR}/{db,wp,adminer} 2>/dev/null на виртуалке не прокатило
-	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
-	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
-	@mkdir -p ${DATA_DIR}/adminer 2>/dev/null || true
 	@echo -e "\nЗапуск конфигурации ${NAME}..."
+	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: add_dns_to_hosts"
 	@docker-compose -f  srcs/docker-compose.yml build    # собираем все
 	@docker-compose -f  srcs/docker-compose.yml up
 	@#docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
@@ -38,6 +35,10 @@ enter_mariadb:
 enter_wordpres:
 	docker exec -it wordpress /bin/bash
 
+### redis ###
+enter_redis:
+	docker exec -it redis /bin/bash
+
 # check protocol
 tls:
 	openssl s_client -connect 127.0.0.1:443
@@ -63,34 +64,37 @@ images:
 
 ## Удаляем папку (грубо говоря Volume) и заново создаем
 recreatedir:
-	@sudo rm -rf ${DATA_DIR}/db  2>/dev/null
-	@sudo rm -rf ${DATA_DIR}/wp  2>/dev/null
-	@sudo rm -rf ${DATA_DIR}/adminer 2>/dev/null
-	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
-	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
-	@mkdir -p ${DATA_DIR}/adminer 2>/dev/null || true
+	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: mk_dir"
+	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
+#	@sudo rm -rf ${DATA_DIR}/db  2>/dev/null
+#	@sudo rm -rf ${DATA_DIR}/wp  2>/dev/null
+#	@sudo rm -rf ${DATA_DIR}/adm 2>/dev/null
+#	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
+#	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
+#	@mkdir -p ${DATA_DIR}/adm 2>/dev/null || true
 
 ## останавливаем все контейнейры
 stop:
-	docker stop $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker stop $$(docker ps -aq) 2>/dev/null || echo "ERROR: docker stop"
 
 ## запускаем все контейнейры
 start:
-	docker start $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker start $$(docker ps -aq) 2>/dev/null || echo "ERROR: docker start"
 
 ## удаляет контейнеры
 remote:
-	docker rm $$(sudo docker ps -aq) 2>/dev/null || echo " "
+	docker rm $$(docker ps -aq) 2>/dev/null || echo "ERROR: docker rm"
 
 ## удаляет Volume
 rm_volume:
-	docker volume rm $$(docker volume ls -q)  2>/dev/null || echo " "
+	docker volume rm $$(docker volume ls -q)  2>/dev/null || echo "ERROR: volume rm"
 
 rm_network:
-	docker network rm $$(docker network ls -q) 2>/dev/null || echo " "
+	docker network rm $$(docker network ls -q) 2>/dev/null || echo "ERROR: network rm"
 
 rm_dir:
-	@sudo rm -rf /home/${USER}/data 2>/dev/null
+	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
+	@#sudo rm -rf /home/${USER}/data 2>/dev/null
 
 #clean:	stop remote rm_volume rm_network rm_dir
 #	@echo "Очистка конфигурации ${NAME}..."
@@ -107,12 +111,14 @@ clean: down
 
 fclean:
 	@printf "Полная очистка всех конфигураций ${NAME}...\n"
-	@docker stop $$(docker ps -qa) 2>/dev/null || echo " "
+	@docker stop $$(docker ps -qa) 2>/dev/null || echo "ERROR: docker stop"
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force
-	@sudo rm -rf ${DATA_DIR} 2>/dev/null
-	@sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//" /etc/hosts
+	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
+	@bash srcs/requirements/tools/rm_dns_from_hosts.sh ${NICKNAME} 2>/dev/null || echo "ERROR: rm_dns_from_hosts"
+	@#sudo rm -rf ${DATA_DIR} 2>/dev/null
+	@#sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//g" /etc/hosts
 
 #re:	fclean recreatedir all
 
@@ -122,7 +128,8 @@ re:	down
 
 add_dns_to_host:
 	@echo "Задать доменное имя локальному сайту: ${NICKNAME}.42.fr"
-	@echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
+	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null || echo "ERROR: add_dns_to_hosts"
+	@#echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
 
 .PHONY	: all build down re clean fclean add_dns_to_host
 

@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+# Nginx
   nginx:
     build: ./requirements/nginx
     image: cmero-nginx:${version:-latest}
@@ -17,7 +18,7 @@ services:
     ports:
       - "443:443"
     restart: always
-
+# MariaDB
   mariadb:
     build: ./requirements/mariadb
     image: cmero-mariadb:${version:-latest}
@@ -30,7 +31,7 @@ services:
     networks:
       - inception_net
     restart: always
-
+# Wordpress
   wordpress:
     build: ./requirements/wordpress
     image: cmero-wordpress:${version:-latest}
@@ -40,6 +41,16 @@ services:
     hostname: localhost
     volumes:
       - wp:/var/www/html/wordpress
+    networks:
+      - inception_net
+    depends_on:
+      - mariadb
+    restart: always
+# Redis
+  redis:
+    build: ./requirements/bonus/redis
+    image: cmero-redis:${version:-latest}
+    container_name: redis
     networks:
       - inception_net
     depends_on:
@@ -60,6 +71,12 @@ volumes:
       type: none
       o: bind
       device: /home/${USER}/data/wp # ${USER} переменная среды окружения локального хоста
+  adm:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/adm # ${USER} переменная среды окружения локального хоста
 
 networks:
   inception_net: # название сети

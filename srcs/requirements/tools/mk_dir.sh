@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ ! -d "/home/${USER}/data" ]; then
+        mkdir ~/data
+        mkdir ~/data/db
+        mkdir ~/data/wp
+        mkdir ~/data/adm
+        mkdir ~/data/ftp
+fi
