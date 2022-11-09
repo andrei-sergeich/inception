@@ -40,7 +40,7 @@ COPY ./tools/wp_up.sh /var/www/
 
 EXPOSE 9000
 
-ENTRYPOINT ["bash", "/var/www/wp_up.sh" ]
+ENTRYPOINT ["bash", "/var/www/wp_up.sh"]
 
 ####    php-fpm${PHP_VERSION}   ####
 CMD ["/usr/sbin/php-fpm7.3", "-F"]
