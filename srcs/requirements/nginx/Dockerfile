@@ -3,7 +3,8 @@ FROM debian:buster
 ENV TZ=Europe/Moscow
 
 RUN apt-get update -qq && \
-    apt-get install -y nginx openssl tzdata htop && \
+    apt-get install -y \
+    nginx openssl tzdata htop && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
