@@ -51,6 +51,9 @@ services:
     build: ./requirements/bonus/redis
     image: cmero-redis:${version:-latest}
     container_name: redis
+    env_file:
+      - .env
+    hostname: redis
     networks:
       - inception_net
     depends_on:
@@ -64,6 +67,7 @@ services:
     container_name: proftpd
     env_file:
       - .env
+    hostname: localhost
     volumes:
       - wp:/var/www/html/wordpress
     networks:
@@ -74,6 +78,21 @@ services:
       - "60000-60030:60000-60030" # диапазон должен соответствовать диапазону пассивных портов в файле настроек
     depends_on:
       - wordpress
+    restart: always
+#WebSite
+  website:
+    build: ./requirements/bonus/website
+    image: cmero-website:${version:-latest}
+    container_name: website
+    env_file:
+      - .env
+    hostname: localhost
+    networks:
+      - inception_net
+    depends_on:
+      - nginx
+    ports:
+      - "8081:443"
     restart: always
 
 volumes:

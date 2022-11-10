@@ -43,6 +43,10 @@ enter_redis:
 enter_proftpd:
 	docker exec -it proftpd /bin/bash
 
+### website ###
+enter_proftpd:
+	docker exec -it website /bin/bash
+
 # check protocol
 tls:
 	openssl s_client -connect 127.0.0.1:443
@@ -70,12 +74,6 @@ images:
 recreatedir:
 	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: mk_dir"
 	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
-#	@sudo rm -rf ${DATA_DIR}/db  2>/dev/null
-#	@sudo rm -rf ${DATA_DIR}/wp  2>/dev/null
-#	@sudo rm -rf ${DATA_DIR}/adm 2>/dev/null
-#	@mkdir -p ${DATA_DIR}/db 2>/dev/null || true
-#	@mkdir -p ${DATA_DIR}/wp 2>/dev/null || true
-#	@mkdir -p ${DATA_DIR}/adm 2>/dev/null || true
 
 ## останавливаем все контейнейры
 stop:
@@ -132,7 +130,7 @@ re:	down
 
 add_dns_to_host:
 	@echo "Задать доменное имя локальному сайту: ${NICKNAME}.42.fr"
-	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null || echo "ERROR: add_dns_to_hosts"
+	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null && echo "\nSUCCESS: add_dns_to_hosts" || echo "ERROR: add_dns_to_hosts"
 	@#echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
 
 .PHONY	: all build down re clean fclean add_dns_to_host
