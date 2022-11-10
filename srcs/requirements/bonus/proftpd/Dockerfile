@@ -15,10 +15,10 @@ RUN openssl req -x509 -nodes -newkey rsa:2048 \
 
 COPY ./conf/cust_proftpd.conf /etc/proftpd/cust_proftpd.conf
 COPY ./conf/cust_tls.conf /etc/proftpd/tls.conf
-COPY ./tools/ftp_up.sh /usr/bin/start.sh
+COPY ./tools/ftp_up.sh /usr/bin/ftp_up.sh
 
 EXPOSE 20
 EXPOSE 21
 
-ENTRYPOINT ["bash", "/usr/bin/start.sh"]
+ENTRYPOINT ["bash", "/usr/bin/ftp_up.sh"]
 CMD ["/usr/sbin/proftpd", "-n", "-c", "/etc/proftpd/cust_proftpd.conf"]

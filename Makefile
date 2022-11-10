@@ -39,7 +39,7 @@ enter_wordpres:
 enter_redis:
 	docker exec -it redis /bin/bash
 
-### redis ###
+### proftpd ###
 enter_proftpd:
 	docker exec -it proftpd /bin/bash
 
