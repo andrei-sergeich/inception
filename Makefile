@@ -8,8 +8,8 @@ all: add_dns_to_host
 	@echo -e "\nЗапуск конфигурации ${NAME}..."
 	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: add_dns_to_hosts"
 	@docker-compose -f  srcs/docker-compose.yml build    # собираем все
-	@docker-compose -f  srcs/docker-compose.yml up
-	@#docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
+	@docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
+	@#docker-compose -f  srcs/docker-compose.yml up
 
 build:
 	@echo "Сборка конфигурации ${NAME}..."
