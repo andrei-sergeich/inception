@@ -44,8 +44,12 @@ enter_proftpd:
 	docker exec -it proftpd /bin/bash
 
 ### website ###
-enter_proftpd:
+enter_website:
 	docker exec -it website /bin/bash
+
+### adminer ###
+enter_adminer:
+	docker exec -it adminer /bin/bash
 
 # check protocol
 tls:
@@ -104,7 +108,7 @@ rm_dir:
 
 clean: down
 	@echo "Очистка конфигурации ${NAME}..."
-	@docker system prune -a			# сносит все (неиспользуемые контейнеры, образы, кэш), кроме волиумов
+	@docker system prune -a -f			# сносит все (неиспользуемые контейнеры, образы, кэш), кроме волиумов
 
 #fclean:	clean
 #	@echo "Полная очистка конфигурации ${NAME}..."
@@ -117,8 +121,8 @@ fclean:
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force
-	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
-	@bash srcs/requirements/tools/rm_dns_from_hosts.sh ${NICKNAME} 2>/dev/null || echo "ERROR: rm_dns_from_hosts"
+	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null && echo "SUCCESS: rm_dir" || echo "ERROR: rm_dir"
+	@bash srcs/requirements/tools/rm_dns_from_hosts.sh ${NICKNAME} 2>/dev/null && echo "SUCCESS: rm_dns_from_hosts" || echo "ERROR: rm_dns_from_hosts"
 	@#sudo rm -rf ${DATA_DIR} 2>/dev/null
 	@#sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//g" /etc/hosts
 
@@ -130,7 +134,7 @@ re:	down
 
 add_dns_to_host:
 	@echo "Задать доменное имя локальному сайту: ${NICKNAME}.42.fr"
-	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null && echo "\nSUCCESS: add_dns_to_hosts" || echo "ERROR: add_dns_to_hosts"
+	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null && echo "SUCCESS: add_dns_to_hosts" || echo "ERROR: add_dns_to_hosts"
 	@#echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
 
 .PHONY	: all build down re clean fclean add_dns_to_host
@@ -141,5 +145,3 @@ add_dns_to_host:
 # sudo service docker restart
 # sudo docker volume rm inception-volume 
 # sudo docker volume rm db-volume 
-
-#TODO проверить корректность make start после make stop и коды выхода

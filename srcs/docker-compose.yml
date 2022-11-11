@@ -31,14 +31,14 @@ services:
     networks:
       - inception_net
     restart: always
-# Wordpress
+# WordPress
   wordpress:
     build: ./requirements/wordpress
     image: cmero-wordpress:${version:-latest}
     container_name: wordpress
     env_file:
       - .env
-    hostname: localhost
+    hostname: wordpress
     volumes:
       - wp:/var/www/html/wordpress
     networks:
@@ -67,7 +67,7 @@ services:
     container_name: proftpd
     env_file:
       - .env
-    hostname: localhost
+    hostname: proftpd
     volumes:
       - wp:/var/www/html/wordpress
     networks:
@@ -86,13 +86,28 @@ services:
     container_name: website
     env_file:
       - .env
-    hostname: localhost
+    hostname: website
     networks:
       - inception_net
     depends_on:
       - nginx
     ports:
       - "8081:443"
+    restart: always
+#Adminer
+  adminer:
+    build: ./requirements/bonus/adminer
+    image: cmero-adminer:${version:-latest}
+    container_name: adminer
+    env_file:
+      - .env
+    hostname: adminer
+    networks:
+      - inception_net
+    depends_on:
+      - wordpress
+    ports:
+      - "8080:8080"
     restart: always
 
 volumes:
@@ -109,12 +124,6 @@ volumes:
       type: none
       o: bind
       device: /home/${USER}/data/wp # ${USER} переменная среды окружения локального хоста
-  adm:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/${USER}/data/adm # ${USER} переменная среды окружения локального хоста
 
 networks:
   inception_net: # название сети
