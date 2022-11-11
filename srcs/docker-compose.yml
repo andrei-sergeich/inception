@@ -79,7 +79,7 @@ services:
     depends_on:
       - wordpress
     restart: always
-#WebSite
+# WebSite
   website:
     build: ./requirements/bonus/website
     image: cmero-website:${version:-latest}
@@ -94,7 +94,7 @@ services:
     ports:
       - "8081:443"
     restart: always
-#Adminer
+# Adminer
   adminer:
     build: ./requirements/bonus/adminer
     image: cmero-adminer:${version:-latest}
@@ -108,6 +108,20 @@ services:
       - wordpress
     ports:
       - "8080:8080"
+    restart: always
+# Portainer
+  portainer:
+    image: portainer/portainer-ce:2.16.1
+    container_name: portainer
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - pt:/data
+    security_opt:
+      - no-new-privileges:true
     restart: always
 
 volumes:
@@ -124,6 +138,12 @@ volumes:
       type: none
       o: bind
       device: /home/${USER}/data/wp # ${USER} переменная среды окружения локального хоста
+  pt:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/pt # ${USER} переменная среды окружения локального хоста
 
 networks:
   inception_net: # название сети
