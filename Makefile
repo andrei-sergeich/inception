@@ -6,7 +6,7 @@ DATA_DIR	=	/home/${USER}/data
 
 all: add_dns_to_host
 	@echo -e "\nЗапуск конфигурации ${NAME}..."
-	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: add_dns_to_hosts"
+	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null && echo "SUCCESS: mk_dir" || echo "ERROR: mk_dir"
 	@docker-compose -f  srcs/docker-compose.yml build    # собираем все
 	@docker-compose -f  srcs/docker-compose.yml up -d    # запускаем в фоне
 	@#docker-compose -f  srcs/docker-compose.yml up
@@ -76,8 +76,8 @@ images:
 
 ## Удаляем папку (грубо говоря Volume) и заново создаем
 recreatedir:
-	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null || echo "ERROR: mk_dir"
-	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null || echo "ERROR: rm_dir"
+	@bash srcs/requirements/tools/mk_dir.sh 2>/dev/null && echo "SUCCESS: mk_dir" || echo "ERROR: mk_dir"
+	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null && echo "SUCCESS: rm_dir" || echo "ERROR: rm_dir"
 
 ## останавливаем все контейнейры
 stop:
@@ -117,14 +117,13 @@ clean: down
 
 fclean:
 	@printf "Полная очистка всех конфигураций ${NAME}...\n"
-	@docker stop $$(docker ps -qa) 2>/dev/null || echo "ERROR: docker stop"
+	@docker stop $$(docker ps -qa) 2>/dev/null && echo "SUCCESS: docker stop" || echo "ERROR: docker stop"
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force
+	@docker volume rm $$(docker volume ls -q)  2>/dev/null && echo "SUCCESS: volume rm" || echo "ERROR: volume rm"
 	@bash srcs/requirements/tools/rm_dir.sh 2>/dev/null && echo "SUCCESS: rm_dir" || echo "ERROR: rm_dir"
 	@bash srcs/requirements/tools/rm_dns_from_hosts.sh ${NICKNAME} 2>/dev/null && echo "SUCCESS: rm_dns_from_hosts" || echo "ERROR: rm_dns_from_hosts"
-	@#sudo rm -rf ${DATA_DIR} 2>/dev/null
-	@#sudo sed -i "s/127.0.0.1 ${NICKNAME}.42.fr//g" /etc/hosts
 
 #re:	fclean recreatedir all
 
@@ -135,7 +134,6 @@ re:	down
 add_dns_to_host:
 	@echo "Задать доменное имя локальному сайту: ${NICKNAME}.42.fr"
 	@bash srcs/requirements/tools/add_dns_to_hosts.sh ${NICKNAME} 2>/dev/null && echo "SUCCESS: add_dns_to_hosts" || echo "ERROR: add_dns_to_hosts"
-	@#echo -n "127.0.0.1 ${NICKNAME}.42.fr" | sudo tee -a /etc/hosts
 
 .PHONY	: all build down re clean fclean add_dns_to_host
 
